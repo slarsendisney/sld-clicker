@@ -13,17 +13,17 @@ const server = express()
 const io = require("socket.io")(server);
 
 let defaultPres = {
-  presenting: false,
   deck: "none",
   slide: 0,
   presenter: "",
 };
 
 let pres = defaultPres;
+let active = false;
 
 io.on("connection", function (socket) {
   console.log("socket connected: " + socket.id);
-  if (pres.presenting) {
+  if (active) {
     socket.emit("action", {
       type: "startLivePresentor",
       data: pres,
@@ -31,14 +31,10 @@ io.on("connection", function (socket) {
   }
 
   socket.on("action", (action) => {
-    if (action.type === "server/hello") {
-      console.log("got hello data!", action.data);
-      socket.emit("action", { type: "message", data: "🍉 says hey!" });
-    }
     if (action.type === "server/verify") {
       if (process.env.PRESENT_PASSWORD === action.data.password) {
         pres.presenter = socket.id;
-        pres.presenting = true;
+        active = true;
         pres.deck = action.data.location;
         pres.slide = action.data.index;
         socket.emit("action", {
@@ -62,6 +58,7 @@ io.on("connection", function (socket) {
       io.emit("action", {
         type: "endLivePresentor",
       });
+      active = false;
       pres = defaultPres;
     }
   });
@@ -71,6 +68,7 @@ io.on("connection", function (socket) {
       io.emit("action", {
         type: "endLivePresentor",
       });
+      active = false;
       pres = defaultPres;
     }
   });
