@@ -28,6 +28,10 @@ io.on("connection", function (socket) {
       type: "startLivePresentor",
       data: pres,
     });
+  } else {
+    io.emit("action", {
+      type: "endLivePresentor",
+    });
   }
 
   socket.on("action", (action) => {
