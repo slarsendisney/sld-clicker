@@ -47,18 +47,22 @@ io.on("connection", function (socket) {
       }
     }
     if (action.type === "server/updateIndex") {
-      pres.slide = action.data;
-      io.emit("action", {
-        type: "updatePresIndex",
-        data: pres,
-      });
+      if (socket.id === pres.presenter) {
+        pres.slide = action.data;
+        io.emit("action", {
+          type: "updatePresIndex",
+          data: pres,
+        });
+      }
     }
     if (action.type === "server/endPres") {
-      io.emit("action", {
-        type: "endLivePresentor",
-      });
-      active = false;
-      pres = defaultPres;
+      if (socket.id === pres.presenter) {
+        io.emit("action", {
+          type: "endLivePresentor",
+        });
+        active = false;
+        pres = defaultPres;
+      }
     }
   });
 
