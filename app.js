@@ -19,10 +19,16 @@ let defaultPres = {
 };
 
 let pres = defaultPres;
+let currentCount = 0;
 let active = false;
 
 io.on("connection", function (socket) {
   console.log("socket connected: " + socket.id);
+  currentCount++;
+  io.emit("action", {
+    type: "userCount",
+    data: currentCount,
+  });
   if (active) {
     socket.emit("action", {
       type: "startLivePresentor",
@@ -67,6 +73,11 @@ io.on("connection", function (socket) {
   });
 
   socket.on("disconnect", function () {
+    currentCount--;
+    io.emit("action", {
+      type: "userCount",
+      data: currentCount,
+    });
     if (socket.id === pres.presenter) {
       io.emit("action", {
         type: "endLivePresentor",
