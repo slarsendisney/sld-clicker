@@ -1,10 +1,7 @@
 require("dotenv").config();
 const express = require("express");
-const socketIO = require("socket.io");
 const PORT = process.env.PORT || 3000;
 const INDEX = "/index.html";
-
-const dev = !(process.env.NODE_ENV === "production");
 
 const server = express()
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
@@ -12,7 +9,7 @@ const server = express()
 
 const io = require("socket.io")(server);
 
-let defaultPres = {
+const defaultPres = {
   deck: "none",
   slide: 0,
   presenter: "",
