@@ -9,7 +9,7 @@ const GatsbyWebHook =
   "https://webhook.gatsbyjs.com/hooks/data_source/publish/2b4621eb-f392-4c7a-9db5-a36ef4173b97";
 
 var job = new CronJob(
-  "0 00 9 * * *",
+  "0 00 21 * * *",
   function () {
     fetch(GatsbyWebHook, { method: "POST", body: "a=1" }).then(() =>
       console.log("Pinged Gatsby")
