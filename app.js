@@ -45,6 +45,7 @@ const server = express()
         count: firebase.firestore.FieldValue.increment(
           Math.floor(parseInt(amount) / 3)
         ),
+        recent: from_name,
       });
       kofiQueue.push({ from_name, amount });
       res.sendStatus(200);
