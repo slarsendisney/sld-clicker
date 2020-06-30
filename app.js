@@ -23,9 +23,11 @@ var job = new CronJob(
 job.start();
 
 const server = express()
-  .use(express.json())
+  // .use(express.json())
+  .use(express.urlencoded({ extended: true }))
   .post("/kofi", function (req, res) {
-    const { from_name, amount } = req.body.data;
+    console.log(JSON.parse(req.body.data));
+    const { from_name, amount } = JSON.parse(req.body.data);
     if (req.query.secret === process.env.KOFI_PASSWORD) {
       kofiQueue.push({ from_name, amount });
       res.sendStatus(200);
