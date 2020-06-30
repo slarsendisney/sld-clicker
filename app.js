@@ -1,12 +1,12 @@
 require("dotenv").config();
+const onChange = require("on-change");
 const CronJob = require("cron").CronJob;
 const express = require("express");
 const fetch = require("node-fetch");
 const PORT = process.env.PORT || 3000;
 const INDEX = "/index.html";
 
-const GatsbyWebHook =
-  "https://webhook.gatsbyjs.com/hooks/data_source/publish/2b4621eb-f392-4c7a-9db5-a36ef4173b97";
+const GatsbyWebHook = process.env.GATSBY_WEB_HOOK;
 
 var job = new CronJob(
   "0 00 21 * * *",
@@ -23,10 +23,48 @@ var job = new CronJob(
 job.start();
 
 const server = express()
+  .use(express.json())
+  .post("/kofi", function (req, res) {
+    const { from_name, amount } = req.body.data;
+    if (req.query.secret === process.env.KOFI_PASSWORD) {
+      kofiQueue.push({ from_name, amount });
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(401);
+    }
+  })
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 const io = require("socket.io")(server);
+
+function DonationHandler() {
+  console.log(`${kofiQueue.length} Dontaion In Queue!`);
+  if (kofiQueue.length > 0) {
+    const current = kofiQueue[0];
+    io.emit("action", {
+      type: "donation",
+      data: current,
+    });
+    setTimeout(() => {
+      kofiQueue.shift();
+      DonationHandler();
+    }, parseInt(current.amount) * 10000);
+  } else {
+    io.emit("action", {
+      type: "donationEnds",
+    });
+  }
+}
+const template = [];
+
+let kofiQueue = onChange(template, function (path, value, previousValue) {
+  // console.log("previousValue:", previousValue);
+  // console.log("Value:", value);
+  if (previousValue.length === 0) {
+    DonationHandler();
+  }
+});
 
 const defaultPres = {
   deck: "none",
@@ -35,15 +73,20 @@ const defaultPres = {
 };
 
 let pres = defaultPres;
-let currentCount = 0;
 let active = false;
 
 io.on("connection", function (socket) {
   console.log("socket connected: " + socket.id);
-  currentCount++;
+  if (kofiQueue.length > 0) {
+    const current = kofiQueue[0];
+    io.emit("action", {
+      type: "donation",
+      data: current,
+    });
+  }
   io.emit("action", {
     type: "userCount",
-    data: currentCount,
+    data: io.engine.clientsCount,
   });
   if (active) {
     socket.emit("action", {
@@ -89,10 +132,9 @@ io.on("connection", function (socket) {
   });
 
   socket.on("disconnect", function () {
-    currentCount--;
     io.emit("action", {
       type: "userCount",
-      data: currentCount,
+      data: io.engine.clientsCount,
     });
     if (socket.id === pres.presenter) {
       io.emit("action", {
