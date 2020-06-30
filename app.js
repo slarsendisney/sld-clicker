@@ -1,4 +1,16 @@
 require("dotenv").config();
+require("firebase/firestore");
+
+const firebase = require("firebase");
+
+firebase.initializeApp({
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+});
+var db = firebase.firestore();
+var coffeeCountRef = db.collection("coffee").doc("ko-fi");
+
 const onChange = require("on-change");
 const CronJob = require("cron").CronJob;
 const express = require("express");
@@ -29,6 +41,11 @@ const server = express()
     console.log(JSON.parse(req.body.data));
     const { from_name, amount } = JSON.parse(req.body.data);
     if (req.query.secret === process.env.KOFI_PASSWORD) {
+      coffeeCountRef.update({
+        count: firebase.firestore.FieldValue.increment(
+          Math.floor(parseInt(amount) / 3)
+        ),
+      });
       kofiQueue.push({ from_name, amount });
       res.sendStatus(200);
     } else {
