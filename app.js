@@ -17,6 +17,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const PORT = process.env.PORT || 3000;
 const INDEX = "/index.html";
+const { DonationHandler } = require("./donations");
 
 const GatsbyWebHook = process.env.GATSBY_WEB_HOOK;
 
@@ -38,7 +39,6 @@ const server = express()
   // .use(express.json())
   .use(express.urlencoded({ extended: true }))
   .post("/kofi", function (req, res) {
-    console.log(JSON.parse(req.body.data));
     const { from_name, amount } = JSON.parse(req.body.data);
     if (req.query.secret === process.env.KOFI_PASSWORD) {
       coffeeCountRef.update({
@@ -58,45 +58,18 @@ const server = express()
 
 const io = require("socket.io")(server);
 
-function DonationHandler() {
-  console.log(`${kofiQueue.length} Dontaion In Queue!`);
-  if (kofiQueue.length > 0) {
-    const current = kofiQueue[0];
-    io.emit("action", {
-      type: "donation",
-      data: current,
-    });
-    setTimeout(() => {
-      kofiQueue.shift();
-      DonationHandler();
-    }, parseInt(current.amount) * 10000);
-  } else {
-    io.emit("action", {
-      type: "donationEnds",
-    });
-  }
-}
-const template = [];
-
-let kofiQueue = onChange(template, function (path, value, previousValue) {
-  // console.log("previousValue:", previousValue);
-  // console.log("Value:", value);
+let kofiQueue = onChange([], function (path, value, previousValue) {
   if (previousValue.length === 0) {
-    DonationHandler();
+    DonationHandler(kofiQueue, io);
   }
 });
 
-const defaultPres = {
-  deck: "none",
-  slide: 0,
-  presenter: "",
-};
-
-let pres = defaultPres;
-let active = false;
+let pres = require("./defaultPres.json");
 
 io.on("connection", function (socket) {
   console.log("socket connected: " + socket.id);
+  require("./count")(socket, io);
+  require("./presentation")(socket, io, pres);
   if (kofiQueue.length > 0) {
     const current = kofiQueue[0];
     io.emit("action", {
@@ -104,64 +77,4 @@ io.on("connection", function (socket) {
       data: current,
     });
   }
-  io.emit("action", {
-    type: "userCount",
-    data: io.engine.clientsCount,
-  });
-  if (active) {
-    socket.emit("action", {
-      type: "startLivePresentor",
-      data: pres,
-    });
-  }
-  socket.on("action", (action) => {
-    if (action.type === "server/verify") {
-      if (process.env.PRESENT_PASSWORD === action.data.password) {
-        pres.presenter = socket.id;
-        active = true;
-        pres.deck = action.data.location;
-        pres.slide = action.data.index;
-        socket.emit("action", {
-          type: "verify",
-          data: true,
-        });
-        io.emit("action", {
-          type: "startLivePresentor",
-          data: pres,
-        });
-      }
-    }
-    if (action.type === "server/updateIndex") {
-      if (socket.id === pres.presenter) {
-        pres.slide = action.data;
-        io.emit("action", {
-          type: "updatePresIndex",
-          data: pres,
-        });
-      }
-    }
-    if (action.type === "server/endPres") {
-      if (socket.id === pres.presenter) {
-        io.emit("action", {
-          type: "endLivePresentor",
-        });
-        active = false;
-        pres = defaultPres;
-      }
-    }
-  });
-
-  socket.on("disconnect", function () {
-    io.emit("action", {
-      type: "userCount",
-      data: io.engine.clientsCount,
-    });
-    if (socket.id === pres.presenter) {
-      io.emit("action", {
-        type: "endLivePresentor",
-      });
-      active = false;
-      pres = defaultPres;
-    }
-  });
 });
