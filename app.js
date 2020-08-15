@@ -1,13 +1,15 @@
 require("dotenv").config();
 require("firebase/firestore");
 
-const firebase = require("firebase");
+var firebase = require("firebase-admin");
+
+var serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
 
 firebase.initializeApp({
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
+  credential: firebase.credential.cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_DB_URL,
 });
+
 var db = firebase.firestore();
 var coffeeCountRef = db.collection("coffee").doc("ko-fi");
 
@@ -18,7 +20,6 @@ const fetch = require("node-fetch");
 const PORT = process.env.PORT || 3000;
 const INDEX = "/index.html";
 const { DonationHandler } = require("./donations");
-
 const GatsbyWebHook = process.env.GATSBY_WEB_HOOK;
 
 var job = new CronJob(
@@ -70,6 +71,8 @@ io.on("connection", function (socket) {
   console.log("socket connected: " + socket.id);
   require("./count")(socket, io);
   require("./presentation")(socket, io, pres);
+  require("./poll")(socket, io, firebase);
+  require("./qAndA")(socket, firebase);
   if (kofiQueue.length > 0) {
     const current = kofiQueue[0];
     io.emit("action", {

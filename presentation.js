@@ -1,4 +1,10 @@
 module.exports = function (socket, io, pres) {
+  if (pres.presenter !== "") {
+    socket.emit("action", {
+      type: "startLivePresentor",
+      data: pres,
+    });
+  }
   socket.on("action", (action) => {
     if (action.type === "server/verify") {
       if (process.env.PRESENT_PASSWORD === action.data.password) {
