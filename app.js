@@ -65,12 +65,10 @@ let kofiQueue = onChange([], function (path, value, previousValue) {
   }
 });
 
-let pres = require("./defaultPres.json");
-
 io.on("connection", function (socket) {
   console.log("socket connected: " + socket.id);
   require("./count")(socket, io);
-  require("./presentation")(socket, io, pres);
+  require("./presentation")(socket, io);
   require("./poll")(socket, io, firebase);
   require("./qAndA")(socket, firebase);
   if (kofiQueue.length > 0) {

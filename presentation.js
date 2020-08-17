@@ -1,5 +1,9 @@
-module.exports = function (socket, io, pres) {
-  if (pres.presenter !== "") {
+const defaultPres = require("./defaultPres.json");
+let pres = defaultPres;
+
+module.exports = function (socket, io) {
+  if (pres.presenter) {
+    console.log(pres);
     socket.emit("action", {
       type: "startLivePresentor",
       data: pres,
@@ -8,6 +12,7 @@ module.exports = function (socket, io, pres) {
   socket.on("action", (action) => {
     if (action.type === "server/verify") {
       if (process.env.PRESENT_PASSWORD === action.data.password) {
+        console.log("Host: " + socket.id);
         pres.presenter = socket.id;
         pres.deck = action.data.location;
         pres.slide = action.data.index;
@@ -32,19 +37,23 @@ module.exports = function (socket, io, pres) {
     }
     if (action.type === "server/endPres") {
       if (socket.id === pres.presenter) {
+        console.log("presenter ended session");
         io.emit("action", {
           type: "endLivePresentor",
         });
-        pres = require("./defaultPres.json");
+        delete pres.presenter;
+        console.log(pres);
       }
     }
   });
   socket.on("disconnect", function () {
     if (socket.id === pres.presenter) {
+      console.log("presenter disconnect");
       io.emit("action", {
         type: "endLivePresentor",
       });
-      pres = require("./defaultPres.json");
+      delete pres.presenter;
+      console.log(pres);
     }
   });
 };
