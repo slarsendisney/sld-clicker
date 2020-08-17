@@ -3,7 +3,6 @@ let pres = defaultPres;
 
 module.exports = function (socket, io) {
   if (pres.presenter) {
-    console.log(pres);
     socket.emit("action", {
       type: "startLivePresentor",
       data: pres,
@@ -42,7 +41,6 @@ module.exports = function (socket, io) {
           type: "endLivePresentor",
         });
         delete pres.presenter;
-        console.log(pres);
       }
     }
   });
@@ -53,7 +51,6 @@ module.exports = function (socket, io) {
         type: "endLivePresentor",
       });
       delete pres.presenter;
-      console.log(pres);
     }
   });
 };
