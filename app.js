@@ -81,8 +81,8 @@ const server = express()
           ["count"]: firebase.firestore.FieldValue.increment(1),
         },
         { merge: true }
-      );
-    res.sendStatus(200);
+      )
+      .then(() => res.sendStatus(200));
   })
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
