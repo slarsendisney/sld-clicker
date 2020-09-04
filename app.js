@@ -36,8 +36,25 @@ var job = new CronJob(
 
 job.start();
 
+var cors = require("cors");
+var allowedList = [
+  "https://api.sld.codes",
+  "https://sld.codes",
+  "http://localhost:8000",
+];
+var corsOptions = {
+  origin: function (origin, callback) {
+    console.log(`Request from: ${origin}`);
+    if (allowedList.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
 const server = express()
-  // .use(express.json())
+  .use(cors(corsOptions))
   .use(express.urlencoded({ extended: true }))
   .post("/kofi", function (req, res) {
     const { from_name, amount } = JSON.parse(req.body.data);
