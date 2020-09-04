@@ -54,6 +54,19 @@ const server = express()
       res.sendStatus(401);
     }
   })
+  .post("/thanks", function (req, res) {
+    firebase
+      .firestore()
+      .collection("thanks")
+      .doc("thanks")
+      .set(
+        {
+          ["count"]: firebase.firestore.FieldValue.increment(1),
+        },
+        { merge: true }
+      );
+    res.sendStatus(200);
+  })
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
