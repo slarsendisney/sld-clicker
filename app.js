@@ -87,6 +87,7 @@ const server = express()
   })
   .post("/like", function (req, res) {
     const { contentID, type } = req.body;
+    console.log({ contentID, type });
     firebase
       .firestore()
       .collection("likes")
