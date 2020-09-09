@@ -12,7 +12,7 @@ firebase.initializeApp({
 
 var db = firebase.firestore();
 var coffeeCountRef = db.collection("coffee").doc("ko-fi");
-
+var bodyParser = require("body-parser");
 const onChange = require("on-change");
 const CronJob = require("cron").CronJob;
 const express = require("express");
@@ -55,6 +55,7 @@ var corsOptions = {
 
 const server = express()
   .use(cors(corsOptions))
+  .use(bodyParser.json())
   .use(express.urlencoded({ extended: true }))
   .post("/kofi", function (req, res) {
     const { from_name, amount } = JSON.parse(req.body.data);
@@ -79,6 +80,20 @@ const server = express()
       .set(
         {
           ["count"]: firebase.firestore.FieldValue.increment(1),
+        },
+        { merge: true }
+      )
+      .then(() => res.sendStatus(200));
+  })
+  .post("/like", function (req, res) {
+    const { contentID, type } = req.body;
+    firebase
+      .firestore()
+      .collection("likes")
+      .doc(contentID)
+      .set(
+        {
+          [type]: firebase.firestore.FieldValue.increment(1),
         },
         { merge: true }
       )
