@@ -54,7 +54,6 @@ var corsOptions = {
 };
 
 const server = express()
-  .use(cors(corsOptions))
   .use(bodyParser.json())
   .use(express.urlencoded({ extended: true }))
   .post("/kofi", function (req, res) {
@@ -72,7 +71,7 @@ const server = express()
       res.sendStatus(401);
     }
   })
-  .post("/thanks", function (req, res) {
+  .post("/thanks", cors(corsOptions), function (req, res) {
     firebase
       .firestore()
       .collection("thanks")
@@ -85,7 +84,7 @@ const server = express()
       )
       .then(() => res.sendStatus(200));
   })
-  .post("/like", function (req, res) {
+  .post("/like", cors(corsOptions), function (req, res) {
     const { contentID, type } = req.body;
     console.log({ contentID, type });
     firebase
