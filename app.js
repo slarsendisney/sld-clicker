@@ -41,10 +41,10 @@ var allowedList = [
   "https://api.sld.codes",
   "https://sld.codes",
   "https://log.sld.codes",
-  "https://log.sld.codes/",
   "http://localhost:8000",
 ];
 var corsOptions = {
+  "preflightContinue": true,
   origin: function (origin, callback) {
     console.log(`Request from: ${origin}`);
     if (allowedList.indexOf(origin) !== -1) {
