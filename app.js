@@ -71,6 +71,28 @@ const server = express()
       res.sendStatus(401);
     }
   })
+  .post("/dev-post", cors(corsOptions), function (req, res) {
+    const { html, currentDate, milliseconds } = req.body;
+    firebase
+      .firestore()
+      .collection("logs")
+      .add({
+        html,
+        currentDate,
+        milliseconds,
+      })
+      .then(() => res.sendStatus(200));
+  })
+  .post("/dev-delete", cors(corsOptions), function (req, res) {
+    const { id } = req.body;
+    firebase
+      .firestore()
+      .collection("logs")
+      .doc(id)
+      .delete()
+
+      .then(() => res.sendStatus(200));
+  })
   .post("/thanks", cors(corsOptions), function (req, res) {
     firebase
       .firestore()
