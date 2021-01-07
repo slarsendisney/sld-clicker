@@ -40,6 +40,7 @@ var cors = require("cors");
 var allowedList = [
   "https://api.sld.codes",
   "https://sld.codes",
+  "https://log.sld.codes",
   "http://localhost:8000",
 ];
 var corsOptions = {
