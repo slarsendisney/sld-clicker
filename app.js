@@ -39,10 +39,9 @@ job.start();
 var cors = require("cors");
 var corsOptions = {
   origin: [
-    "https://api.sld.codes",
     "https://sld.codes",
-    "https://log.sld.codes",
-    "http://localhost:8000",
+    /\.sld\.codes$/
+    
   ]
 };
 
