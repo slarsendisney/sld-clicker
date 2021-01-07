@@ -63,7 +63,7 @@ const server = express()
       res.sendStatus(401);
     }
   })
-  .post("/dev-post", cors(corsOptions), function (req, res) {
+  .post("/dev-post", function (req, res) {
     const { html, currentDate, milliseconds } = req.body;
     firebase
       .firestore()
@@ -75,7 +75,7 @@ const server = express()
       })
       .then(() => res.sendStatus(200));
   })
-  .post("/dev-delete", cors(corsOptions), function (req, res) {
+  .post("/dev-delete", function (req, res) {
     const { id } = req.body;
     firebase
       .firestore()
