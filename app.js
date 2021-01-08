@@ -52,25 +52,6 @@ var corsOptions = {
 const server = express()
   .use(bodyParser.json())
   .use(express.urlencoded({ extended: true }))
-  .post("/subscribe", function (req, res) {
-    const { email } = req.body;
-    fetch("https://api.sendgrid.com/v3/marketing/contacts", {
-      method: "PUT",
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`
-      },
-      body: JSON.stringify({
-        list_ids: ["c323bc06-339c-437b-b73b-4e5c77e933f8"],
-        contacts: [
-          {
-            email,
-            custom_fields: {},
-          },
-        ],
-      }),
-    }).then(() => res.sendStatus(200));
-  })
   .post("/kofi", function (req, res) {
     const { from_name, amount } = JSON.parse(req.body.data);
     if (req.query.secret === process.env.KOFI_PASSWORD) {
@@ -86,6 +67,28 @@ const server = express()
       res.sendStatus(401);
     }
   })
+  .options("/subscribe", cors(corsOptions))
+  .post("/subscribe", cors(corsOptions), function (req, res) {
+    const { email } = req.body;
+    console.log("Sub from email:" + email);
+    fetch("https://api.sendgrid.com/v3/marketing/contacts", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+      },
+      body: JSON.stringify({
+        list_ids: ["c323bc06-339c-437b-b73b-4e5c77e933f8"],
+        contacts: [
+          {
+            email,
+            custom_fields: {},
+          },
+        ],
+      }),
+    }).then(() => res.sendStatus(200));
+  })
+  .options("/dev-post", cors(corsOptions))
   .post("/dev-post", cors(corsOptions), function (req, res) {
     const { html, currentDate, milliseconds, password } = req.body;
     if (process.env.PRESENT_PASSWORD === password) {
@@ -98,9 +101,11 @@ const server = express()
           milliseconds,
         })
         .then(() => res.sendStatus(200));
+    } else {
+      res.sendStatus(400);
     }
-    res.sendStatus(400);
   })
+  .options("/dev-delete", cors(corsOptions))
   .post("/dev-delete", cors(corsOptions), function (req, res) {
     const { id, password } = req.body;
 
@@ -111,8 +116,9 @@ const server = express()
         .doc(id)
         .delete()
         .then(() => res.sendStatus(200));
+    } else {
+      res.sendStatus(400);
     }
-    res.sendStatus(400);
   })
   .post("/thanks", cors(corsOptions), function (req, res) {
     firebase
