@@ -68,25 +68,31 @@ const server = express()
     }
   })
   .post("/dev-post", cors(corsOptions), function (req, res) {
-    const { html, currentDate, milliseconds } = req.body;
-    firebase
-      .firestore()
-      .collection("logs")
-      .add({
-        html,
-        currentDate,
-        milliseconds,
-      })
-      .then(() => res.sendStatus(200));
+    const { html, currentDate, milliseconds, password } = req.body;
+    if (process.env.PRESENT_PASSWORD === password) {
+      firebase
+        .firestore()
+        .collection("logs")
+        .add({
+          html,
+          currentDate,
+          milliseconds,
+        })
+        .then(() => res.sendStatus(200));
+    }
+    res.sendStatus(400);
   })
   .post("/dev-delete", cors(corsOptions), function (req, res) {
-    const { id } = req.body;
-    firebase
-      .firestore()
-      .collection("logs")
-      .doc(id)
-      .delete()
-      .then(() => res.sendStatus(200));
+    const { id, password } = req.body;
+    if (process.env.PRESENT_PASSWORD === password) {
+      firebase
+        .firestore()
+        .collection("logs")
+        .doc(id)
+        .delete()
+        .then(() => res.sendStatus(200));
+    }
+    res.sendStatus(400);
   })
   .post("/thanks", cors(corsOptions), function (req, res) {
     firebase
