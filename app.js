@@ -84,6 +84,7 @@ const server = express()
   })
   .post("/dev-delete", cors(corsOptions), function (req, res) {
     const { id, password } = req.body;
+    
     if (process.env.PRESENT_PASSWORD === password) {
       firebase
         .firestore()
