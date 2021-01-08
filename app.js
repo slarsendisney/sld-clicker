@@ -39,12 +39,12 @@ job.start();
 var cors = require("cors");
 var whitelist = [
   "https://sld.codes",
-  "https://log.sld.codes"
+  "https://log.sld.codes",
+  "http://localhost:8000",
 ];
 var corsOptions = {
   origin: function (origin, callback) {
     var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
-    !originIsWhitelisted && console.log(`Blocked Request from ${origin}`)
     callback(null, originIsWhitelisted);
   },
 };
