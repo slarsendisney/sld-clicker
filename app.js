@@ -44,6 +44,7 @@ var whitelist = [
 var corsOptions = {
   origin: function (origin, callback) {
     var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+    !originIsWhitelisted && console.log(`Blocked Request from ${origin}`)
     callback(null, originIsWhitelisted);
   },
 };
