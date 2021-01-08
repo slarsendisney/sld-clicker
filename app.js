@@ -37,12 +37,15 @@ var job = new CronJob(
 job.start();
 
 var cors = require("cors");
+var whitelist = [
+  "https://sld.codes",
+  "https://log.sld.codes"
+];
 var corsOptions = {
-  origin: [
-    "https://sld.codes",
-    /\.sld\.codes$/
-    
-  ]
+  origin: function (origin, callback) {
+    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+    callback(null, originIsWhitelisted);
+  },
 };
 
 const server = express()
@@ -63,7 +66,7 @@ const server = express()
       res.sendStatus(401);
     }
   })
-  .post("/dev-post", cors(corsOptions), function (req, res) {
+  .post("/devpost", cors(corsOptions), function (req, res) {
     const { html, currentDate, milliseconds } = req.body;
     firebase
       .firestore()
@@ -75,14 +78,13 @@ const server = express()
       })
       .then(() => res.sendStatus(200));
   })
-  .post("/dev-delete", cors(corsOptions), function (req, res) {
+  .post("/devdelete", cors(corsOptions), function (req, res) {
     const { id } = req.body;
     firebase
       .firestore()
       .collection("logs")
       .doc(id)
       .delete()
-
       .then(() => res.sendStatus(200));
   })
   .post("/thanks", cors(corsOptions), function (req, res) {
