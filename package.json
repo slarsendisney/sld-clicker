@@ -17,7 +17,7 @@
     "express": "^4.17.1",
     "firebase": "^7.15.5",
     "firebase-admin": "^9.0.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "on-change": "^2.0.1",
     "socket.io": "^2.3.0"
   }
