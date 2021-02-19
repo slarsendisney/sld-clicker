@@ -39,6 +39,7 @@ job.start();
 var cors = require("cors");
 var whitelist = [
   "https://sld.codes",
+  "https://metadream.xyz",
   "https://log.sld.codes",
   "http://localhost:8000",
 ];
@@ -88,6 +89,27 @@ const server = express()
       }),
     }).then(() => res.sendStatus(200));
   })
+  .options("/subscribe-metadream", cors(corsOptions))
+  .post("/subscribe-metadream", cors(corsOptions), function (req, res) {
+    const { email } = req.body;
+    console.log("Sub to metadream from email:" + email);
+    fetch("https://api.sendgrid.com/v3/marketing/contacts", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+      },
+      body: JSON.stringify({
+        list_ids: ["01c40ae0-80ef-477e-b997-476cead4a3a5"],
+        contacts: [
+          {
+            email,
+            custom_fields: {},
+          },
+        ],
+      }),
+    }).then(() => res.sendStatus(200));
+  })
   .options("/dev-post", cors(corsOptions))
   .post("/dev-post", cors(corsOptions), function (req, res) {
     const { html, currentDate, milliseconds, password } = req.body;
@@ -108,7 +130,6 @@ const server = express()
   .options("/dev-delete", cors(corsOptions))
   .post("/dev-delete", cors(corsOptions), function (req, res) {
     const { id, password } = req.body;
-
     if (process.env.PRESENT_PASSWORD === password) {
       firebase
         .firestore()
