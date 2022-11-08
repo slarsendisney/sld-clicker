@@ -42,6 +42,8 @@ var whitelist = [
   "https://metadream.xyz",
   "https://log.sld.codes",
   "http://localhost:8000",
+  "http://localhost:3000",
+  "https://sld-codes-v4.vercel.app"
 ];
 var corsOptions = {
   origin: function (origin, callback) {
