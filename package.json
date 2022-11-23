@@ -19,6 +19,6 @@
     "firebase-admin": "^9.0.0",
     "node-fetch": "^2.6.0",
     "on-change": "^2.0.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.5.0"
   }
 }
